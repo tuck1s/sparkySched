@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #SparkPost example - manage scheduled transmissions via command-line
 #Copyright  2017 SparkPost
 
