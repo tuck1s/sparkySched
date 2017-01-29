@@ -32,7 +32,7 @@ def stripQuotes(s):
 
 # Get connection parameters from .ini file
 config = configparser.ConfigParser()
-config.read('Sparkpost.ini')
+config.read('sparkpost.ini')
 apiKey = stripQuotes(config['SparkPost']['Authorization'])
 uri = 'https://' + stripQuotes(config['SparkPost']['Host'])
 sp = SparkPost(apiKey, uri)
@@ -40,7 +40,7 @@ sp = SparkPost(apiKey, uri)
 # Schedule this send for N seconds in the future
 st = datetime.utcnow()+timedelta(seconds=300)
 stStr = st.strftime('%Y-%m-%dT%H:%M:%S')
-print('Scheduled send: ', stStr, 'to: ', uri)
+print('Scheduled send: ', stStr, ' UTC to service: ', uri)
 
 sendObj = dict(
     recipients = ['test@sparkysched.sink.sparkpostmail.com'],
