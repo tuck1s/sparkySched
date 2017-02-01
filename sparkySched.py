@@ -23,6 +23,7 @@ from __future__ import print_function
 import configparser
 from sparkpost import SparkPost
 from datetime import datetime,timedelta
+from sparkpost.exceptions import SparkPostAPIException
 
 # Strip initial and final quotes from strings, if present
 def stripQuotes(s):
@@ -35,7 +36,7 @@ config = configparser.ConfigParser()
 config.read('sparkpost.ini')
 apiKey = stripQuotes(config['SparkPost']['Authorization'])
 uri = 'https://' + stripQuotes(config['SparkPost']['Host'])
-sp = SparkPost(apiKey, uri)
+sp = SparkPost(apiKey+'.', uri)
 
 # Schedule this send for N seconds in the future
 st = datetime.utcnow()+timedelta(seconds=300)
@@ -56,5 +57,9 @@ sendObj = dict(
 )
 
 for i in range(0,1000):
-    response = sp.transmissions.send(**sendObj)
-    print(response['id'])
+    try:
+        response = sp.transmissions.send(**sendObj)
+        print('Message injected: ID='+response['id'])
+    except SparkPostAPIException as err:
+        print('SparkPost returned error code', err.response.status_code, ':',err.errors)
+        exit(1)
