@@ -61,5 +61,5 @@ for i in range(0,1000):
         response = sp.transmissions.send(**sendObj)
         print('Message injected: ID='+response['id'])
     except SparkPostAPIException as err:
-        print('SparkPost returned error code', err.response.status_code, ':',err.errors)
+        print('SparkPost returned error code', err.status, ':',err.errors)
         exit(1)
