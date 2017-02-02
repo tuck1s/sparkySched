@@ -36,7 +36,7 @@ config = configparser.ConfigParser()
 config.read('sparkpost.ini')
 apiKey = stripQuotes(config['SparkPost']['Authorization'])
 uri = 'https://' + stripQuotes(config['SparkPost']['Host'])
-sp = SparkPost(apiKey+'.', uri)
+sp = SparkPost(apiKey, uri)
 
 # Schedule this send for N seconds in the future
 st = datetime.utcnow()+timedelta(seconds=300)
