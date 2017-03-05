@@ -19,7 +19,6 @@
 #
 
 from __future__ import print_function
-
 import configparser
 from sparkpost import SparkPost
 from datetime import datetime,timedelta
