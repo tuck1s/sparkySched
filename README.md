@@ -77,7 +77,7 @@ To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send t
 $
 ```
 
-##Performance considerations
+## Performance considerations
 You'll get the very best performance if you are able to host the tool "close" to the SparkPost injection point i.e. low latency.
 
 A real production injector should also make use of concurrency - see [best practices](https://support.sparkpost.com/customer/portal/articles/2249268), but please note this code is deliberately sending single-recipient-per-call.
@@ -85,7 +85,7 @@ A real production injector should also make use of concurrency - see [best pract
 ## TODO / possible extensions
 Global substitution data / metadata, and per-recipient data / metadata could be included via extensions to the command-line parameters and recipients file format.
 
-##See Also
+## See Also
 
 [Transmission API call - options attributes start_time](https://developers.sparkpost.com/api/transmissions.html#header-options-attributes)
 
