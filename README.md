@@ -61,7 +61,7 @@ MANDATORY PARAMETERS
 ## Example output
 
 ```
-$ ./sparkySched.py recips_100k.csv west-wing-dry-run 2017-03-20T19:10:00+00:00
+$ ./sparkySched.py recips_100k.csv my-dry-run 2017-03-20T19:10:00+00:00
 Opened connection to https://demo.sparkpostelite.com
 Injecting to SparkPost:
 To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 66538125845299279 in 13.311 seconds
