@@ -15,7 +15,7 @@
 #limitations under the License.
 
 #
-# Author: Steve Tuck (March 2017)
+# Author: Steve Tuck (April 2017)
 #
 
 from __future__ import print_function
@@ -23,12 +23,6 @@ import configparser, time, json, sys, os
 from sparkpost import SparkPost
 from datetime import datetime,timedelta
 from sparkpost.exceptions import SparkPostAPIException
-
-# Strip initial and final quotes from strings, if present
-def stripQuotes(s):
-    if s.startswith('"') and s.endswith('"'):
-        s = s[1:-1]
-    return s
 
 def printHelp():
     progName = sys.argv[0]
@@ -44,7 +38,7 @@ def printHelp():
     print('    sending_time         In ISO format, interpreted as UTC (Greenwich Mean Time) as in YYYY-MM-DDTHH:MM:SS')
     print('                             with optional timezone offset as in YYYY-MM-DDTHH:MM:SS±HH:MM')
 
-# Check/enforce SparkPost's native start_time format, which is slightly different to Python's
+# Validate SparkPost start_time format, slightly different to Python datetime (which has no : in timezone offset format specifier)
 def isExpectedDateTimeFormat(timestamp):
     format_string = '%Y-%m-%dT%H:%M:%S%z'
     try:
@@ -57,25 +51,17 @@ def isExpectedDateTimeFormat(timestamp):
     except ValueError:
         return False
 
-# Inject the messages into SparkPost for a batch of recipients, using a named template, binding, and campaign ID
-# Global substitution data is applied, along with a start_time for scheduled sending.
-def sendToRecips(sp, recipBatch, template, binding, campaign, globalSubData, returnPath, startTime):
-    print('To', str(len(recipBatch)).rjust(5, ' '),
-          'recips: template "' + template + '" binding "' + binding + '" campaign "' + campaign + '" start_time ' + startTime + ' : ',
-          end='', flush=True)
+# Inject the messages into SparkPost for a batch of recipients, using the specified transmission parameters
+def sendToRecips(sp, recipBatch, sendObj):
+    print('To', str(len(recipBatch)).rjust(5, ' '),'recips: template "'+sendObj['template']+'" start_time '+sendObj['start_time']+' : ',end='', flush=True)
 
-    sendObj = dict(
-        recipients=recipBatch,
-        template=template,  # this sets the friendly-from and subject line
-        track_opens=True,
-        track_clicks=True,
-        use_draft_template=False,
-        start_time=startTime,
-        campaign=campaign,  # Note attribute is called campaign, not campaign_id
-        return_path=returnPath,
-        metadata={"binding": binding},
-        substitution_data=globalSubData
-    )
+    # Compose in additional API-call parameters
+    sendObj.update({
+        'recipients': recipBatch,
+        'track_opens':  True,
+        'track_clicks': True,
+        'use_draft_template': False
+    })
     startT = time.time()
     try:
         response = sp.transmissions.send(**sendObj)
@@ -89,20 +75,35 @@ def sendToRecips(sp, recipBatch, template, binding, campaign, globalSubData, ret
 # Main code
 # -----------------------------------------------------------------------------------------
 # Get parameters from .ini file
-# Get connection parameters from .ini file
+configFile = 'sparkpost.ini'
 config = configparser.ConfigParser()
-config.read('sparkpost.ini')
-p = dict(
-    apiKey = stripQuotes(config['SparkPost']['Authorization']),
-    uri = 'https://' + stripQuotes(config['SparkPost']['Host']),
-    binding = stripQuotes(config['SparkPost']['Binding']),
-    returnPath = stripQuotes(config['SparkPost']['Return-Path']),
-    batchSize = int(stripQuotes(config['SparkPost']['BatchSize'])),
-    campaign  = stripQuotes(config['SparkPost']['Campaign']),
-)
+config.read_file(open(configFile))
+cfg = config['SparkPost']
+apiKey = cfg.get('Authorization', '')           # API key is mandatory
+if not apiKey:
+    print('Error: missing Authorization line in ' + configFile)
+    exit(1)
+baseUri = 'https://' + cfg.get('Host', 'api.sparkpost.com')     # optional, default to public service
 
-# Get the recipients, today's deals, and sending time from the command-line
-# Check argument count and validate command-line input.  If a file cannot be opened, then Python will raise an exception
+# Open the adapter towards SparkPost
+sp = SparkPost(api_key = apiKey, base_uri = baseUri)
+print('Opened connection to', baseUri)
+
+# Compose optional transmission parameters from the .ini file, if present
+txOpts = {}
+if cfg.get('Binding'):
+    txOpts['metadata'] = {"binding": cfg.get('Binding')}
+if cfg.get('Return-Path'):
+    txOpts['return_path'] = cfg.get('Return-Path')
+if cfg.get('Campaign'):
+    txOpts['campaign']  = cfg.get('Campaign')
+if cfg.get('GlobalSub'):
+    txOpts['substitution_data'] = json.loads(cfg.get('GlobalSub'))
+
+batchSize = cfg.getint('BatchSize', 10000)      # Use default batch size if not given in the .ini file
+
+# Get the recipient-list filename, template ID and sending time from the command-line
+# Check argument count and validate command-line input.
 if len(sys.argv) >= 4:
     try:
         fh_recipList = open(sys.argv[1])
@@ -110,31 +111,23 @@ if len(sys.argv) >= 4:
         print('Error opening recipients file', Err.filename, ':', Err.strerror)
         exit(1)
 
-    # Get today's selected deal IDs as integers
-    templateID = sys.argv[2]
+    txOpts['template'] = sys.argv[2]
 
-    timeString = sys.argv[3]
-    if(not isExpectedDateTimeFormat(timeString)):
-        print('Unexpected date/time string value', timeString)
+    txOpts['start_time'] = sys.argv[3]
+    if not isExpectedDateTimeFormat(txOpts['start_time']):
+        print('Unexpected date/time string value', txOpts['start_time'])
         exit(1)
 else:
     printHelp()
     exit(0)
 
-# Open the 'adapter' towards SparkPost
-sp = SparkPost(p['apiKey'], p['uri'])
-print('Opened connection to',p['uri'])
-
 # Read the recipients from the file specified on the command line.  Build them into batches of N
 print('Injecting to SparkPost:')
-gs = {}                                         # Fully formed template - no global substitution data required
 recipBatch = []
 for r in fh_recipList:
     recipBatch.append(r.rstrip() )              # strip the trailing newline character
-    if(len(recipBatch) >= p['batchSize'] ):
-        sendToRecips(sp, recipBatch, templateID, p['binding'], p['campaign'], gs, p['returnPath'], timeString)
+    if len(recipBatch) >= batchSize:
+        sendToRecips(sp, recipBatch, txOpts)
         recipBatch = []                         # Empty out, ready for next batch
-
-# Handle the final batch remaining, if any
-if(len(recipBatch) > 0):
-    sendToRecips(sp, recipBatch, templateID, p['binding'], p['campaign'], gs, p['returnPath'], timeString)
+if len(recipBatch) > 0:                         # Handle the final batch remaining, if any
+    sendToRecips(sp, recipBatch, txOpts)

@@ -12,28 +12,34 @@ Install the [python-sparkpost](https://github.com/sparkpost/python-sparkpost) li
 pip install sparkpost
 ```
 
-Set up a sparkpost.ini file as follows.
-  
-```
+Set up a basic sparkpost.ini file:
+```ini
 [SparkPost]
-# SparkPost Enterprise EU values
-Authorization = "##myAPIkey##"
-Host = "demo.sparkpostelite.com"
-Return-Path = "bounces@elite.trysparkpost.com"
-Binding = "outbound"
-BatchSize = "10000"
-Campaign = "Daily send test 10k batches"
+Authorization = ##myAPIkey##
 ```
-
-The surrounding quotes are needed.
 
 Replace `##myAPIkey##` with your specific, private API key. 
 
-The `host`, `Return-Path` and `Binding` attributes are only needed for SparkPost Enterprise service usage; you can omit them for [sparkpost.com](https://www.sparkpost.com/).
+The full suite of options is as follows:
+```ini
+[SparkPost]
+Authorization = ##myAPIkey##
+Host = demo.sparkpostelite.com
 
-The `BatchSize` attribute can be left at 10000, the Best Practices article below discusses this.
+#Campaign setup
+Binding = outbound
+Campaign = avocado-saladcopter
+Return-Path = bounces@elite.trysparkpost.com
+GlobalSub = {"subject": "Fresh avocado delivered to your door in 30 minutes by our flying saladcopter"}
+BatchSize = 2000
+```
+The `Host`, `Binding` and `Return-Path` attributes are needed for SparkPost Enterprise service usage; you can omit them for [sparkpost.com](https://www.sparkpost.com/).
 
-The `Campaign` attribute is free format text and is helpful for filtering reports on the UI.
+The `BatchSize` attribute is optional.  If omitted, a default of 10000 is used. The Best Practices article below discusses this.
+
+The `Campaign` attribute is optional, free format text and is helpful for filtering reports on the UI.
+
+The `GlobalSub` attribute is optional, JSON-formatted text, enabling you to set [template substitution values](https://developers.sparkpost.com/api/substitutions-reference.html)
 
 The tool injects messages using the specified local recipients file and existing SparkPost stored template (referred to by template_ID),  with a scheduled start time.
 
@@ -61,29 +67,20 @@ MANDATORY PARAMETERS
 ## Example output
 
 ```
-$ ./sparkySched.py recips_100k.csv my-dry-run 2017-03-20T19:10:00+00:00
+$ ./sparkySched.py recips_100k.csv avocado-goodness 2017-04-06T12:35:00+01:00
 Opened connection to https://demo.sparkpostelite.com
 Injecting to SparkPost:
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 66538125845299279 in 13.311 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 48523727151264958 in 14.656 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 66538125845299281 in 12.074 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 48523727151264960 in 15.122 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 30509328364958224 in 10.332 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 48523727151264994 in 15.058 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 30509328364958227 in 9.992 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 48523727151265006 in 39.808 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 30509328364958273 in 12.413 seconds
-To 10000 recips: template "my-dry-run" binding "outbound" campaign "Daily send test 10k batches" start_time 2017-03-20T19:10:00+00:00 : OK TxID 66538125845299402 in 10.705 seconds
-$
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00 : OK TxID 48535365195681112 in 8.143 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00 : OK TxID 66549763839380444 in 6.076 seconds
 ```
 
 ## Performance considerations
 You'll get the very best performance if you are able to host the tool "close" to the SparkPost injection point i.e. low latency.
 
-A real production injector should also make use of concurrency - see [best practices](https://support.sparkpost.com/customer/portal/articles/2249268), but please note this code is deliberately sending single-recipient-per-call.
+A real production injector can also make use of concurrency - see [best practices](https://support.sparkpost.com/customer/portal/articles/2249268).
 
 ## TODO / possible extensions
-Global substitution data / metadata, and per-recipient data / metadata could be included via extensions to the command-line parameters and recipients file format.
+Per-recipient data / metadata could be included via extensions to the command-line parameters and recipients file format.
 
 ## See Also
 
