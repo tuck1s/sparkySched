@@ -19,7 +19,7 @@
 #
 
 from __future__ import print_function
-import configparser, time, json, sys, os
+import configparser, time, json, sys, os, csv
 from sparkpost import SparkPost
 from datetime import datetime,timedelta
 from sparkpost.exceptions import SparkPostAPIException
@@ -53,7 +53,7 @@ def isExpectedDateTimeFormat(timestamp):
 
 # Inject the messages into SparkPost for a batch of recipients, using the specified transmission parameters
 def sendToRecips(sp, recipBatch, sendObj):
-    print('To', str(len(recipBatch)).rjust(5, ' '),'recips: template "'+sendObj['template']+'" start_time '+sendObj['start_time']+' : ',end='', flush=True)
+    print('To', str(len(recipBatch)).rjust(5, ' '),'recips: template "'+sendObj['template']+'" start_time '+sendObj['start_time']+': ',end='', flush=True)
 
     # Compose in additional API-call parameters
     sendObj.update({
@@ -64,9 +64,12 @@ def sendToRecips(sp, recipBatch, sendObj):
     })
     startT = time.time()
     try:
-        response = sp.transmissions.send(**sendObj)
+        res = sp.transmissions.send(**sendObj)
         endT = time.time()
-        print('OK TxID', response['id'], 'in', round(endT - startT, 3), 'seconds')
+        if res['total_accepted_recipients'] != len(recipBatch):
+            print(res)
+        else:
+            print('OK - in', round(endT - startT, 3), 'seconds')
     except SparkPostAPIException as err:
         print('error code', err.status, ':', err.errors)
         exit(1)
@@ -124,10 +127,40 @@ else:
 # Read the recipients from the file specified on the command line.  Build them into batches of N
 print('Injecting to SparkPost:')
 recipBatch = []
-for r in fh_recipList:
-    recipBatch.append(r.rstrip() )              # strip the trailing newline character
-    if len(recipBatch) >= batchSize:
-        sendToRecips(sp, recipBatch, txOpts)
-        recipBatch = []                         # Empty out, ready for next batch
-if len(recipBatch) > 0:                         # Handle the final batch remaining, if any
+f = csv.reader(fh_recipList)
+
+for r in f:
+    if f.line_num == 1:                         # Check if header row present
+        if 'email' in r:                        # we've got an email header-row field - continue
+            hdr = r
+            continue
+        elif '@' in r[0] and len(r) == 1:       # Also accept headerless format with just email addresses
+            hdr = ['email']
+            continue
+        else:
+            print('Invalid .csv file header - must contain "email" field')
+            exit(1)
+    else:
+        # Parse values from the line of the file into a row object
+        row = {}
+        for i,h in enumerate(hdr):
+            if r[i]:                                        # Only parse non-empty fields from this line
+                if h == 'email':
+                    row['address'] = {h: r[i]}              # begin the address
+                elif h == 'name':
+                    row['address'].update(name = r[i])      # add into the existing address structure
+                elif h == 'return_path':
+                    row[h] = r[i]                   # simple string field
+                elif (h == 'metadata' or h == 'substitution_data' or h == 'tags'):
+                    row[h] = json.loads(r[i])       # parse these fields as JSON text into dict objects
+                else:
+                    print('Unexpected .csv file field name found: ', h)
+                    exit(1)
+
+        recipBatch.append(row)
+        if len(recipBatch) >= batchSize:
+            sendToRecips(sp, recipBatch, txOpts)
+            recipBatch = []                     # Empty out, ready for next batch
+# Handle the final batch remaining, if any
+if len(recipBatch) > 0:
     sendToRecips(sp, recipBatch, txOpts)

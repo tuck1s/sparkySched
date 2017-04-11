@@ -39,12 +39,16 @@ The `BatchSize` attribute is optional.  If omitted, a default of 10000 is used. 
 
 The `Campaign` attribute is optional, free format text and is helpful for filtering reports on the UI.
 
-The `GlobalSub` attribute is optional, JSON-formatted text, enabling you to set [template substitution values](https://developers.sparkpost.com/api/substitutions-reference.html)
+The `GlobalSub` attribute is optional, JSON-formatted text, enabling you to set [template substitution values](https://developers.sparkpost.com/api/substitutions-reference.html).
 
 The tool injects messages using the specified local recipients file and existing SparkPost stored template (referred to by template_ID),  with a scheduled start time.
 
 An example recipients file that is destined for the [Smart Sink](https://support.sparkpost.com/customer/portal/articles/2560839-how-do-i-test-using-the-sink-server-on-sparkpost-) is included for test purposes.
 They will show up as actual deliveries in your account (because they are actually getting delivered; and they count towards your account volume allowance).
+
+The recipients file input format can be either
+- a simple list of email addresses, or
+- a .csv file, formatted as per SparkPost's own recipient-list format (template available from the app.sparkpost.com UI), containing `email,name,return_path,metadata,substitution_data,tags`
 
 ## Usage
 ```
@@ -70,8 +74,16 @@ MANDATORY PARAMETERS
 $ ./sparkySched.py recips_100k.csv avocado-goodness 2017-04-06T12:35:00+01:00
 Opened connection to https://demo.sparkpostelite.com
 Injecting to SparkPost:
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00 : OK TxID 48535365195681112 in 8.143 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00 : OK TxID 66549763839380444 in 6.076 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 10.938 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 10.253 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 8.612 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 8.201 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 12.009 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 8.932 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 9.49 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 9.937 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 9.519 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 11.266 seconds
 ```
 
 ## Performance considerations
