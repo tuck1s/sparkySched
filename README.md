@@ -71,19 +71,19 @@ MANDATORY PARAMETERS
 ## Example output
 
 ```
-$ ./sparkySched.py recips_100k.csv avocado-goodness 2017-04-06T12:35:00+01:00
+$ ./sparkySched.py recips_100k_sub_n_tags.csv avocado-goodness 2017-04-11T23:55:00+01:00
 Opened connection to https://demo.sparkpostelite.com
 Injecting to SparkPost:
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 10.938 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 10.253 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 8.612 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 8.201 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 12.009 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 8.932 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 9.49 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 9.937 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 9.519 seconds
-To 10000 recips: template "avocado-goodness" start_time 2017-04-06T12:35:00+01:00: OK - in 11.266 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 4.97 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 4.92 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 4.783 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 5.524 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 4.902 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 5.072 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 5.404 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 4.821 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 5.017 seconds
+To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:00: OK - in 4.723 seconds
 ```
 
 ## Performance considerations
