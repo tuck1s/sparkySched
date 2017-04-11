@@ -47,7 +47,7 @@ An example recipients file that is destined for the [Smart Sink](https://support
 They will show up as actual deliveries in your account (because they are actually getting delivered; and they count towards your account volume allowance).
 
 The recipients file input format can be either
-- a simple list of email addresses, or
+- a simple list of email addresses, one per line, or
 - a .csv file, formatted as per SparkPost's own recipient-list format (template available from the app.sparkpost.com UI), containing `email,name,return_path,metadata,substitution_data,tags`
 
 ## Usage
