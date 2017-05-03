@@ -135,27 +135,26 @@ for r in f:
             hdr = r
             continue
         elif '@' in r[0] and len(r) == 1:       # Also accept headerless format with just email addresses
-            hdr = ['email']
-            continue
+            hdr = ['email']                     # line 1 contains data - so continue processing
         else:
             print('Invalid .csv file header - must contain "email" field')
             exit(1)
-    else:
-        # Parse values from the line of the file into a row object
-        row = {}
-        for i,h in enumerate(hdr):
-            if r[i]:                                        # Only parse non-empty fields from this line
-                if h == 'email':
-                    row['address'] = {h: r[i]}              # begin the address
-                elif h == 'name':
-                    row['address'].update(name = r[i])      # add into the existing address structure
-                elif h == 'return_path':
-                    row[h] = r[i]                   # simple string field
-                elif (h == 'metadata' or h == 'substitution_data' or h == 'tags'):
-                    row[h] = json.loads(r[i])       # parse these fields as JSON text into dict objects
-                else:
-                    print('Unexpected .csv file field name found: ', h)
-                    exit(1)
+
+    # Parse values from the line of the file into a row object
+    row = {}
+    for i,h in enumerate(hdr):
+        if r[i]:                                        # Only parse non-empty fields from this line
+            if h == 'email':
+                row['address'] = {h: r[i]}              # begin the address
+            elif h == 'name':
+                row['address'].update(name = r[i])      # add into the existing address structure
+            elif h == 'return_path':
+                row[h] = r[i]                   # simple string field
+            elif (h == 'metadata' or h == 'substitution_data' or h == 'tags'):
+                row[h] = json.loads(r[i])       # parse these fields as JSON text into dict objects
+            else:
+                print('Unexpected .csv file field name found: ', h)
+                exit(1)
 
         recipBatch.append(row)
         if len(recipBatch) >= batchSize:
