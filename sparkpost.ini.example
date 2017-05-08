@@ -1,0 +1,5 @@
+[SparkPost]
+Authorization = <YOUR API KEY>
+#Campaign setup
+Campaign = avocado-saladcopter
+GlobalSub = {"subject": "Fresh avocado delivered to your door in 30 minutes by our flying saladcopter"}
