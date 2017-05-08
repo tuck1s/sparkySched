@@ -89,10 +89,7 @@ To 10000 recips: template "avocado-goodness" start_time 2017-04-11T23:55:00+01:0
 ## Performance considerations
 You'll get the very best performance if you are able to host the tool "close" to the SparkPost injection point i.e. low latency.
 
-A real production injector can also make use of concurrency - see [best practices](https://support.sparkpost.com/customer/portal/articles/2249268).
-
-## TODO / possible extensions
-Per-recipient data / metadata could be included via extensions to the command-line parameters and recipients file format.
+A real production injector can also make use of concurrency (not done here) - see [best practices](https://support.sparkpost.com/customer/portal/articles/2249268).
 
 ## See Also
 
