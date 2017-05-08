@@ -149,17 +149,17 @@ for r in f:
             elif h == 'name':
                 row['address'].update(name = r[i])      # add into the existing address structure
             elif h == 'return_path':
-                row[h] = r[i]                   # simple string field
+                row[h] = r[i]                           # simple string field
             elif (h == 'metadata' or h == 'substitution_data' or h == 'tags'):
-                row[h] = json.loads(r[i])       # parse these fields as JSON text into dict objects
+                row[h] = json.loads(r[i])               # parse these fields as JSON text into dict objects
             else:
                 print('Unexpected .csv file field name found: ', h)
                 exit(1)
 
-        recipBatch.append(row)
-        if len(recipBatch) >= batchSize:
-            sendToRecips(sp, recipBatch, txOpts)
-            recipBatch = []                     # Empty out, ready for next batch
+    recipBatch.append(row)
+    if len(recipBatch) >= batchSize:
+        sendToRecips(sp, recipBatch, txOpts)
+        recipBatch = []                                 # Empty out, ready for next batch
 # Handle the final batch remaining, if any
 if len(recipBatch) > 0:
     sendToRecips(sp, recipBatch, txOpts)
